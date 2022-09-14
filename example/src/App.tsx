@@ -1,31 +1,28 @@
-import * as React from 'react';
+import * as React from 'react'
 
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-firebase-chat-sdk';
+import { StyleSheet, View } from 'react-native'
+import NavigationProvider from './providers/navigation'
+import UserProvider from './providers/user'
 
-export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
-  );
+export default function App(): JSX.Element {
+    return (
+        <View style={styles.container}>
+            <UserProvider>
+                <NavigationProvider />
+            </UserProvider>
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
-  },
-});
+    container: {
+        flex: 1,
+        paddingTop: 50,
+    },
+    title: { textAlign: 'center', fontSize: 28, fontWeight: '700' },
+    box: {
+        width: 60,
+        height: 60,
+        marginVertical: 20,
+    },
+})

@@ -1,5 +1,5 @@
 {
-  "name": "react-native-firebase-chat-sdk",
+  "name": "@westudents/react-native-halo-chat-core",
   "version": "0.1.0",
   "description": "test",
   "main": "lib/commonjs/index",
@@ -23,12 +23,12 @@
   ],
   "scripts": {
     "test": "jest",
-    "typescript": "tsc --noEmit",
+    "typecheck": "tsc --extendedDiagnostics --noEmit --project .",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
     "release": "release-it",
     "example": "yarn --cwd example",
-    "bootstrap": "yarn example && yarn && yarn example pods"
+    "commit": "npx git-cz"
   },
   "keywords": [
     "react-native",
@@ -36,7 +36,7 @@
     "android"
   ],
   "repository": "https://github.com/we-students/react-native-firebase-chat-sdk",
-  "author": "Westudents Tech Team <tech@westudents.it> <tech@westudents.it> (https://developers.westudents.it)",
+  "author": "Westudents Tech Team <tech@westudents.it> (https://developers.westudents.it)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/we-students/react-native-firebase-chat-sdk/issues"
@@ -49,18 +49,25 @@
     "@arkweid/lefthook": "^0.7.7",
     "@babel/eslint-parser": "^7.18.2",
     "@commitlint/config-conventional": "^17.0.2",
-    "@react-native-community/eslint-config": "^3.0.2",
+    "@react-native-community/eslint-config": "^3.1.0",
+    "@react-native-firebase/app": "^14.11.1",
+    "@react-native-firebase/auth": "^14.11.1",
+    "@react-native-firebase/firestore": "^14.11.1",
     "@release-it/conventional-changelog": "^5.0.0",
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
     "@types/react-native": "0.68.0",
+    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/parser": "^5.36.2",
+    "@westudents/eslint-config-react-native": "^1.0.0",
     "commitlint": "^17.0.2",
-    "eslint": "^8.4.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "jest": "^28.1.1",
     "pod-install": "^0.1.0",
-    "prettier": "^2.0.5",
+    "prettier": "^2.7.1",
     "react": "17.0.2",
     "react-native": "0.68.2",
     "react-native-builder-bob": "^0.18.3",
@@ -71,6 +78,9 @@
     "@types/react": "17.0.21"
   },
   "peerDependencies": {
+    "@react-native-firebase/app": "^14",
+    "@react-native-firebase/auth": "^14",
+    "@react-native-firebase/firestore": "^14",
     "react": "*",
     "react-native": "*"
   },
@@ -85,6 +95,11 @@
     "extends": [
       "@commitlint/config-conventional"
     ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   },
   "release-it": {
     "git": {
@@ -105,35 +120,28 @@
   },
   "eslintConfig": {
     "root": true,
-    "parser": "@babel/eslint-parser",
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 2020,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "extends": [
-      "@react-native-community",
-      "prettier"
+      "@westudents/eslint-config-react-native"
     ],
     "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ]
+      "@typescript-eslint/no-namespace": "off"
     }
   },
   "eslintIgnore": [
     "node_modules/",
     "lib/"
   ],
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false
-  },
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",

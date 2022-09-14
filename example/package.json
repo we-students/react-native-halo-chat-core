@@ -11,8 +11,18 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^14.11.1",
+    "@react-native-firebase/auth": "^14.11.1",
+    "@react-native-firebase/firestore": "^14.11.1",
+    "@react-navigation/native": "^6.0.12",
+    "@react-navigation/stack": "^6.2.3",
     "react": "17.0.2",
-    "react-native": "0.68.2"
+    "react-native": "0.68.2",
+    "react-native-gesture-handler": "^2.6.0",
+    "react-native-heroicons": "^3.1.0",
+    "react-native-safe-area-context": "^3.4.1",
+    "react-native-screens": "^3.17.0",
+    "react-native-svg": "^12.4.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
