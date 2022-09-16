@@ -1,6 +1,6 @@
 import type { ScreenProps } from '../../types'
 import * as React from 'react'
-import { Button, FlatList, StyleSheet, View } from 'react-native'
+import { Button, FlatList, Platform, StyleSheet, Text, View } from 'react-native'
 import { createRoomWithUsers, fetchUsers, User } from '@westudents/react-native-halo-chat-core'
 import { useUser } from '../../providers/user'
 import { StackActions } from '@react-navigation/native'
@@ -53,8 +53,12 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
 
     return (
         <View style={styles.screenContainer}>
+            <View style={styles.header}>
+                <Text style={styles.title}>Create Chat</Text>
+            </View>
             <FlatList
                 data={users}
+                contentContainerStyle={styles.scrollContenr}
                 renderItem={renderUser}
                 ItemSeparatorComponent={renderDivider}
                 ListFooterComponent={<Button title="back" onPress={handleBack} />}
@@ -66,7 +70,6 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        paddingHorizontal: 25,
         backgroundColor: '#fff',
     },
     divider: {
@@ -75,17 +78,26 @@ const styles = StyleSheet.create({
     userItem: {
         paddingVertical: 12,
     },
+    scrollContenr: {
+        paddingHorizontal: 25,
+    },
     title: {
         fontSize: 28,
         textAlign: 'center',
         fontWeight: '700',
         marginBottom: 16,
-        color: '#000',
+        color: '#fff',
     },
     userName: {
         fontSize: 18,
         fontWeight: '500',
         color: '#000',
+    },
+    header: {
+        height: Platform.OS === 'ios' ? 150 : 120,
+        backgroundColor: '#005ff0',
+        paddingHorizontal: 25,
+        justifyContent: 'flex-end',
     },
 })
 

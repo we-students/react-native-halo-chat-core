@@ -124,7 +124,6 @@ export const sendFileMessage = async ({
     }
     metadata?: Record<string, any>
 }): Promise<void> => {
-    // todo:
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
 
@@ -136,8 +135,6 @@ export const sendFileMessage = async ({
     } else if (file.mimeType.match(/^audio\//)) {
         content_type = 'AUDIO'
     }
-
-    if (content_type !== 'IMAGE' && content_type !== 'VIDEO' && content_type !== 'AUDIO') return
 
     let docPath = file.filename
     switch (content_type) {
@@ -175,6 +172,62 @@ export const sendFileMessage = async ({
             mimeType: file.mimeType,
             name: file.filename,
             uri: await attachmentRef.getDownloadURL(),
+        },
+        deleted_by: [],
+        delivered: false,
+        read: false,
+        metadata: metadata || null,
+    }
+
+    await messageDocRef.set(message)
+}
+
+export const sendFileMessageWithUrl = async ({
+    roomId,
+    text,
+    file,
+    metadata,
+}: {
+    roomId: string
+    text?: string
+    file: {
+        filename: string
+        url: string
+        mimeType: string
+    }
+    metadata?: Record<string, any>
+}): Promise<void> => {
+    // todo:
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
+
+    let content_type: 'AUDIO' | 'VIDEO' | 'IMAGE' | 'CUSTOM' = 'CUSTOM'
+    if (file.mimeType.match(/^image\//)) {
+        content_type = 'IMAGE'
+    } else if (file.mimeType.match(/^video\//)) {
+        content_type = 'VIDEO'
+    } else if (file.mimeType.match(/^audio\//)) {
+        content_type = 'AUDIO'
+    }
+
+    const messageDocRef = firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .collection(CollectionName.MESSAGES)
+        .doc()
+
+    const message: MessageType.File = {
+        id: messageDocRef.id,
+        room: roomId,
+        content_type,
+        text: text || null,
+        created_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        updated_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        created_by: currentFirebaseUser.uid,
+        file: {
+            mimeType: file.mimeType,
+            name: file.filename,
+            uri: file.url,
         },
         deleted_by: [],
         delivered: false,

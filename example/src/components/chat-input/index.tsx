@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
     },
     input: {
         color: '#005ff0',
-        minHeight: 42,
         maxHeight: 120,
+        alignItems: 'center',
     },
     timeText: {
         color: '#fff',

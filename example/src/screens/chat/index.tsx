@@ -1,6 +1,6 @@
 import type { ScreenProps } from '../../types'
 import * as React from 'react'
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RouteProp } from '@react-navigation/native'
 import {
     fetchMessages,
@@ -110,11 +110,13 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
 
     return (
         <View style={styles.screenContainer}>
-            <View style={styles.titleWrapper}>
-                <Pressable style={styles.iconWrapper} onPress={(): void => navigation.goBack()}>
-                    <HeroIcons.ArrowLeftIcon color="#005ff0" />
-                </Pressable>
-                <Text style={styles.title}>{`${chatName}`}</Text>
+            <View style={styles.header}>
+                <View style={styles.titleWrapper}>
+                    <Pressable style={styles.iconWrapper} onPress={(): void => navigation.goBack()}>
+                        <HeroIcons.ArrowLeftIcon color="#fff" />
+                    </Pressable>
+                    <Text style={styles.title}>{`${chatName}`}</Text>
+                </View>
             </View>
             <FlatList
                 keyExtractor={(item): string => item.id}
@@ -141,18 +143,21 @@ const styles = StyleSheet.create({
     divider: {
         height: 12,
     },
+    header: {
+        height: Platform.OS === 'ios' ? 120 : 100,
+        paddingHorizontal: 25,
+        backgroundColor: '#005ff0',
+        paddingVertical: 16,
+        justifyContent: 'flex-end',
+    },
     titleWrapper: {
         flexDirection: 'row',
-        paddingHorizontal: 25,
-        borderBottomColor: '#005ff0',
-        borderBottomWidth: 1,
-        paddingVertical: 8,
         alignItems: 'center',
     },
     title: {
         fontSize: 24,
         fontWeight: '500',
-        color: '#005ff0',
+        color: '#fff',
     },
     iconWrapper: {
         marginRight: 8,
