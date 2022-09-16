@@ -1,6 +1,6 @@
 {
-  "name": "react-native-firebase-chat-sdk-example",
-  "description": "Example app for react-native-firebase-chat-sdk",
+  "name": "react-native-halo-chat-core-example",
+  "description": "Example app for @westudents/react-native-halo-chat-core",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -14,19 +14,27 @@
     "@react-native-firebase/app": "^14.11.1",
     "@react-native-firebase/auth": "^14.11.1",
     "@react-native-firebase/firestore": "^14.11.1",
+    "@react-native-firebase/storage": "^14.11.1",
     "@react-navigation/native": "^6.0.12",
     "@react-navigation/stack": "^6.2.3",
     "react": "17.0.2",
     "react-native": "0.68.2",
+    "react-native-audio-recorder-player": "^3.5.1",
+    "react-native-document-picker": "^8.1.1",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.6.0",
     "react-native-heroicons": "^3.1.0",
+    "react-native-image-picker": "^4.10.0",
     "react-native-safe-area-context": "^3.4.1",
     "react-native-screens": "^3.17.0",
-    "react-native-svg": "^12.4.4"
+    "react-native-svg": "^12.4.4",
+    "react-native-video": "^5.2.1",
+    "rn-fetch-blob": "^0.12.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/runtime": "^7.12.5",
+    "@types/react-native-video": "^5.0.14",
     "babel-plugin-module-resolver": "^4.1.0",
     "metro-react-native-babel-preset": "^0.67.0",
     "patch-package": "^6.4.7",

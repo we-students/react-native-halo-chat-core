@@ -1,8 +1,11 @@
 import type { MessageType, Room, User } from './types'
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage'
 import { CollectionName, userToPreview } from './utils'
 import auth from '@react-native-firebase/auth'
 import { getUser } from './user'
+import { Platform } from 'react-native'
+import RNFetchBlob from 'rn-fetch-blob'
 
 export const createRoomWithUsers = async (users: User[], name?: string): Promise<Room> => {
     const currentFirebaseUser = auth().currentUser
@@ -106,6 +109,82 @@ export const sendTextMessage = async ({
     await messageDocRef.set(message)
 }
 
+export const sendFileMessage = async ({
+    roomId,
+    text,
+    file,
+    metadata,
+}: {
+    roomId: string
+    text?: string
+    file: {
+        filename: string
+        uri: string
+        mimeType: string
+    }
+    metadata?: Record<string, any>
+}): Promise<void> => {
+    // todo:
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
+
+    let content_type: 'AUDIO' | 'VIDEO' | 'IMAGE' | 'CUSTOM' = 'CUSTOM'
+    if (file.mimeType.match(/^image\//)) {
+        content_type = 'IMAGE'
+    } else if (file.mimeType.match(/^video\//)) {
+        content_type = 'VIDEO'
+    } else if (file.mimeType.match(/^audio\//)) {
+        content_type = 'AUDIO'
+    }
+
+    if (content_type !== 'IMAGE' && content_type !== 'VIDEO' && content_type !== 'AUDIO') return
+
+    let docPath = file.filename
+    switch (content_type) {
+        case 'IMAGE':
+            docPath = `/${roomId}/images/` + docPath
+            break
+        case 'VIDEO':
+            docPath = `/${roomId}/videos/` + docPath
+            break
+        case 'AUDIO':
+            docPath = `/${roomId}/audios/` + docPath
+            break
+    }
+
+    const attachmentRef = storage().ref(docPath)
+
+    const uri = Platform.OS === 'ios' ? file.uri : (await RNFetchBlob.fs.stat(file.uri)).path
+    await attachmentRef.putFile(uri)
+
+    const messageDocRef = firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .collection(CollectionName.MESSAGES)
+        .doc()
+
+    const message: MessageType.File = {
+        id: messageDocRef.id,
+        room: roomId,
+        content_type,
+        text: text || null,
+        created_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        updated_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        created_by: currentFirebaseUser.uid,
+        file: {
+            mimeType: file.mimeType,
+            name: file.filename,
+            uri: await attachmentRef.getDownloadURL(),
+        },
+        deleted_by: [],
+        delivered: false,
+        read: false,
+        metadata: metadata || null,
+    }
+
+    await messageDocRef.set(message)
+}
+
 export const messageDelivered = async (roomId: string, messageId: string): Promise<void> => {
     await firestore()
         .collection(CollectionName.ROOMS)
@@ -133,5 +212,14 @@ export const fetchMessages = (
         .collection(CollectionName.ROOMS)
         .doc(roomId)
         .collection(CollectionName.MESSAGES)
-        .onSnapshot((snapshot) => onMessagesUpdate(snapshot.docs.map((d) => d.data() as MessageType.Any)), onError)
+        .onSnapshot(
+            (snapshot) =>
+                onMessagesUpdate(
+                    snapshot.docs
+                        .map((d) => d.data() as MessageType.Any)
+                        .filter((m) => m.created_at !== null)
+                        .sort((m1, m2) => m2.created_at.toDate().getTime() - m1.created_at.toDate().getTime()),
+                ),
+            onError,
+        )
 }

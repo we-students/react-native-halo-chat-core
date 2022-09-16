@@ -1,9 +1,10 @@
 import type { ScreenProps } from '../../types'
 import * as React from 'react'
-import { Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { createRoomWithUsers, fetchUsers, User } from 'react-native-firebase-chat-sdk'
+import { Button, FlatList, StyleSheet, View } from 'react-native'
+import { createRoomWithUsers, fetchUsers, User } from '@westudents/react-native-halo-chat-core'
 import { useUser } from '../../providers/user'
 import { StackActions } from '@react-navigation/native'
+import UserItem from '../../components/user-item'
 
 const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
     const { user } = useUser()
@@ -33,13 +34,12 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
     const renderUser = React.useCallback(
         ({ item }: { item: User }): JSX.Element => {
             return (
-                <TouchableOpacity
-                    style={styles.userItem}
+                <UserItem
+                    user={item}
                     onPress={(): void => {
                         handleCreateChat(item)
-                    }}>
-                    <Text style={styles.userName}>{`${item.first_name} ${item.last_name}`}</Text>
-                </TouchableOpacity>
+                    }}
+                />
             )
         },
         [handleCreateChat],
@@ -70,8 +70,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     divider: {
-        height: 1,
-        backgroundColor: '#4f4f4f',
+        height: 4,
     },
     userItem: {
         paddingVertical: 12,
@@ -81,10 +80,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: '700',
         marginBottom: 16,
+        color: '#000',
     },
     userName: {
         fontSize: 18,
         fontWeight: '500',
+        color: '#000',
     },
 })
 

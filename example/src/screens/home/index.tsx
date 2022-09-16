@@ -1,9 +1,10 @@
 import { useUser } from '../../providers/user'
 import * as React from 'react'
-import { Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Button, FlatList, StyleSheet, Text, View } from 'react-native'
 import auth from '@react-native-firebase/auth'
-import { Room, fetchRooms } from 'react-native-firebase-chat-sdk'
+import { Room, fetchRooms } from '@westudents/react-native-halo-chat-core'
 import type { ScreenProps } from '../../types'
+import ChatItem from '../../components/chat-item'
 
 const HomeScreen = ({ navigation }: ScreenProps): JSX.Element => {
     const { user } = useUser()
@@ -20,17 +21,12 @@ const HomeScreen = ({ navigation }: ScreenProps): JSX.Element => {
     }, [])
 
     const renderUser = React.useCallback(
-        ({ item }: { item: Room }): JSX.Element => {
-            const u = item.users.find((cu) => cu.id !== user?.id)
-            return (
-                <TouchableOpacity
-                    style={styles.userItem}
-                    onPress={(): void => navigation.navigate('Chat', { room: item })}>
-                    <Text style={styles.userName}>{`${u?.first_name} ${u?.last_name}`}</Text>
-                </TouchableOpacity>
-            )
+        ({ item }: { item: Room }): JSX.Element | null => {
+            return user ? (
+                <ChatItem user={user} room={item} onPress={(): void => navigation.navigate('Chat', { room: item })} />
+            ) : null
         },
-        [navigation, user?.id],
+        [navigation, user],
     )
 
     const renderDivider = React.useCallback((): JSX.Element => <View style={styles.divider} />, [])
@@ -52,7 +48,7 @@ const HomeScreen = ({ navigation }: ScreenProps): JSX.Element => {
                 }
                 ListEmptyComponent={
                     <View style={styles.chatPlaceholder}>
-                        <Text>No availables chat</Text>
+                        <Text style={styles.placeholderText}>No availables chat</Text>
                     </View>
                 }
             />
@@ -67,8 +63,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     divider: {
-        height: 1,
-        backgroundColor: '#4f4f4f',
+        height: 8,
     },
     userItem: {
         paddingVertical: 12,
@@ -78,14 +73,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: '700',
         marginBottom: 16,
+        color: '#000',
     },
     userName: {
         fontSize: 18,
         fontWeight: '500',
+        color: '#000',
     },
     chatPlaceholder: {
         alignItems: 'center',
         paddingVertical: 32,
+    },
+    placeholderText: {
+        color: '#000',
     },
 })
 

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
-import { getUser } from 'react-native-firebase-chat-sdk'
+import { getUser } from '@westudents/react-native-halo-chat-core'
 import { useUser } from '../user'
 
 const Stack = createStackNavigator()

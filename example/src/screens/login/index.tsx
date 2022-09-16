@@ -2,7 +2,7 @@ import { useUser } from '../../providers/user'
 import * as React from 'react'
 import { Button, StyleSheet, Text, View } from 'react-native'
 import auth from '@react-native-firebase/auth'
-import { createUser } from 'react-native-firebase-chat-sdk'
+import { createUser } from '@westudents/react-native-halo-chat-core'
 
 const firstNames = ['Paolo', 'Matteo', 'Rocco', 'Giuseppe', 'Giorgia', 'Federica', 'Ferdinando']
 const lastNames = ['Giardino', 'Destefains', 'Di Bello', 'Morabito', 'Scarcella', 'Sapino', 'Nocera']
@@ -24,6 +24,7 @@ const LoginScreen = (): JSX.Element => {
             id: userCredentials.user.uid,
             firstName: randomFirstName(),
             lastName: randomLastName(),
+            image: `https://i.pravatar.cc/150?img=${Math.ceil(Math.random() * 69)}`,
         })
         setUser(u)
     }
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: '#fff',
     },
-    title: { textAlign: 'center', fontSize: 28, fontWeight: '700' },
+    title: { textAlign: 'center', fontSize: 28, fontWeight: '700', color: '#000' },
 })
 
 export default LoginScreen

@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 50,
+        backgroundColor: '#fff',
     },
     title: { textAlign: 'center', fontSize: 28, fontWeight: '700' },
     box: {

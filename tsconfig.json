@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-firebase-chat-sdk": ["./src/index"]
+      "@westudents/react-native-halo-chat-core": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

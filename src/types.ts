@@ -56,10 +56,12 @@ export namespace MessageType {
     }
 
     export interface File extends Base {
-        content_type: 'IMAGE' | 'AUDIO' | 'VIDEO'
-        uri: string
-        mimeType: string | null
-        name: string
+        content_type: 'IMAGE' | 'AUDIO' | 'VIDEO' | 'CUSTOM'
+        file: {
+            uri: string
+            mimeType: string | null
+            name: string
+        }
     }
 
     export interface Custom extends Base {

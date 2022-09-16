@@ -1,5 +1,5 @@
 import * as React from 'react'
-import type { User } from 'react-native-firebase-chat-sdk'
+import type { User } from '@westudents/react-native-halo-chat-core'
 
 export const UserContext = React.createContext<{ user?: User; setUser: (user: User) => void }>({
     user: undefined,

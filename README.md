@@ -1,15 +1,15 @@
-# react-native-firebase-chat-sdk
+# @westudents/react-native-halo-chat-core
 A Firebase chat sdk for React Native applications
 ## Installation
 
 ```sh
-npm install react-native-firebase-chat-sdk
+npm install @westudents/react-native-halo-chat-core
 ```
 
 ## Usage
 
 ```js
-import { multiply } from "react-native-firebase-chat-sdk";
+import { multiply } from "@westudents/react-native-halo-chat-core";
 
 // ...
 
