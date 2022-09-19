@@ -8,6 +8,12 @@ import { getUser } from './user'
 import { Platform } from 'react-native'
 import RNFetchBlob from 'rn-fetch-blob'
 
+/**
+ * It creates a room with the given users
+ * @param {User[]} users - User[] - an array of users to add to the room
+ * @param {string} [name] - The name of the room.
+ * @returns A promise that resolves to a room object
+ */
 export const createRoomWithUsers = async (users: User[], name?: string): Promise<Room> => {
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
@@ -42,6 +48,11 @@ export const createRoomWithUsers = async (users: User[], name?: string): Promise
     return room
 }
 
+/**
+ * It creates a room with the current user and the agent
+ * @param {string[]} tags - string[]
+ * @returns A room object
+ */
 export const createRoomWithAgent = async (tags: string[]): Promise<Room> => {
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
@@ -63,7 +74,19 @@ export const createRoomWithAgent = async (tags: string[]): Promise<Room> => {
     return room
 }
 
-export const fetchRooms = async (onRoomsUpdate: (rooms: Room[]) => void, onError: () => void): Promise<void> => {
+/**
+ * It fetches all the rooms that the current user is a member of, and then calls the onRoomsUpdate
+ * callback with the list of rooms
+ *
+ * The onRoomsUpdate function is called whenever the data changes. The onError function is called
+ * whenever an error occurs
+ * @param onRoomsUpdate - (rooms: Room[]) => void
+ * @param onError - (error: Error) => void
+ */
+export const fetchRooms = async (
+    onRoomsUpdate: (rooms: Room[]) => void,
+    onError: (error: Error) => void,
+): Promise<void> => {
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
 
@@ -101,6 +124,10 @@ const finalizeSendMessage = async (roomId: string, messageData: any): Promise<vo
     })
 }
 
+/**
+ * It creates and sends a message
+ * @param  - roomId - The ID of the room to send the message to
+ */
 export const sendTextMessage = async ({
     roomId,
     text,
@@ -128,6 +155,10 @@ export const sendTextMessage = async ({
     await finalizeSendMessage(roomId, message)
 }
 
+/**
+ * It uploads the file to Firebase Storage, then creates and sends the message
+ * @param  - roomId - The ID of the room to send the message to.
+ */
 export const sendFileMessage = async ({
     roomId,
     text,
@@ -193,6 +224,10 @@ export const sendFileMessage = async ({
     await finalizeSendMessage(roomId, message)
 }
 
+/**
+ * It sends a message to a room with a file attached
+ * @param  - roomId - The ID of the room to send the message to.
+ */
 export const sendFileMessageWithUrl = async ({
     roomId,
     text,
@@ -240,6 +275,11 @@ export const sendFileMessageWithUrl = async ({
     await finalizeSendMessage(roomId, message)
 }
 
+/**
+ * It marks the message as delivered
+ * @param {string} roomId - The id of the room the message was sent to.
+ * @param {string} messageId - The message ID of the message that was delivered.
+ */
 export const messageDelivered = async (roomId: string, messageId: string): Promise<void> => {
     await firestore()
         .collection(CollectionName.ROOMS)
@@ -249,6 +289,11 @@ export const messageDelivered = async (roomId: string, messageId: string): Promi
         .update({ delivered: true })
 }
 
+/**
+ * It marks the message as read
+ * @param {string} roomId - The ID of the room that the message is in.
+ * @param {string} messageId - The ID of the message to mark as read.
+ */
 export const messageRead = async (roomId: string, messageId: string): Promise<void> => {
     await firestore()
         .collection(CollectionName.ROOMS)
@@ -258,6 +303,11 @@ export const messageRead = async (roomId: string, messageId: string): Promise<vo
         .update({ read: true })
 }
 
+/**
+ * It deletes a message from a room
+ * @param {string} roomId - The ID of the room that the message is in.
+ * @param {string} messageId - The ID of the message to delete.
+ */
 export const deleteMessage = async (roomId: string, messageId: string): Promise<void> => {
     await firestore()
         .collection(CollectionName.ROOMS)
@@ -267,6 +317,12 @@ export const deleteMessage = async (roomId: string, messageId: string): Promise<
         .delete()
 }
 
+/**
+ * It listens to the messages collection of a room and calls
+ * @param {string} roomId - The ID of the room to fetch messages from.
+ * @param onMessagesUpdate - (messages: MessageType.Any[]) => void
+ * @param onError - (error: Error) => void
+ */
 export const fetchMessages = (
     roomId: string,
     onMessagesUpdate: (messages: MessageType.Any[]) => void,

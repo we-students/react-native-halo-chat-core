@@ -2,12 +2,19 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 import type { User } from './types'
 import { CollectionName } from './utils'
 
-export const createUser = async (payload: {
+interface CreateUserPayload {
     id: string
     firstName?: string
     lastName?: string
     image?: string
-}): Promise<User> => {
+}
+
+/**
+ * It creates a new user in the database
+ * @param {CreateUserPayload} payload - CreateUserPayload
+ * @returns User
+ */
+export const createUser = async (payload: CreateUserPayload): Promise<User> => {
     const docRef = firestore().collection(CollectionName.USERS).doc(payload.id)
     const user: User = {
         id: payload.id,
@@ -20,12 +27,23 @@ export const createUser = async (payload: {
     return user
 }
 
+/**
+ * It gets a user from the database
+ * @param {string} userId - The user's ID.
+ * @returns User
+ */
 export const getUser = async (userId: string): Promise<User> => {
     const doc = await firestore().collection(CollectionName.USERS).doc(userId).get()
     return doc.data() as User
 }
 
-export const fetchUsers = (onUsersUpdate: (users: User[]) => void, onError: () => void): void => {
+/**
+ * It fetches all users from the database and call onUsersUpdate whenever the data changes.
+ *
+ * @param onUsersUpdate - (users: User[]) => void
+ * @param onError - (error: Error) => void
+ */
+export const fetchUsers = (onUsersUpdate: (users: User[]) => void, onError: (error: Error) => void): void => {
     firestore()
         .collection(CollectionName.USERS)
         .onSnapshot((snapshot) => {
