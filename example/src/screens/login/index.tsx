@@ -4,8 +4,30 @@ import { Button, StyleSheet, Text, View } from 'react-native'
 import auth from '@react-native-firebase/auth'
 import * as HaloChat from '@westudents/react-native-halo-chat-core'
 
-const firstNames = ['Paolo', 'Matteo', 'Rocco', 'Giuseppe', 'Giorgia', 'Federica', 'Ferdinando']
-const lastNames = ['Giardino', 'Destefains', 'Di Bello', 'Morabito', 'Scarcella', 'Sapino', 'Nocera']
+const firstNames = [
+    'Paolo',
+    'Matteo',
+    'Rocco',
+    'Giuseppe',
+    'Giorgia',
+    'Federica',
+    'Ferdinando',
+    'Giorgio',
+    'Fabio',
+    'Mario',
+]
+const lastNames = [
+    'Giardino',
+    'Destefanis',
+    'Di Bello',
+    'Morabito',
+    'Scarcella',
+    'Sapino',
+    'Nocera',
+    'Morelli',
+    'Cielo',
+    'Francese',
+]
 
 const randomFirstName = (): string | undefined => {
     return firstNames[Math.floor(Math.random() * firstNames.length)]

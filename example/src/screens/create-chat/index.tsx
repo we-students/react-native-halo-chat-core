@@ -13,7 +13,26 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
 
     React.useEffect(() => {
         HaloChat.UserActions.fetchUsers(
-            (newUsers) => setUsers(newUsers.filter((u) => u.id !== user?.id)),
+            (newUsers) =>
+                setUsers(
+                    newUsers
+                        .filter((u) => u.id !== user?.id)
+                        .sort((u1, u2) => {
+                            if (u1.last_name === null && u2.last_name !== null) return -1
+                            else if (u1.last_name !== null && u2.last_name === null) return 1
+                            else if (u1.last_name === null && u2.last_name === null) {
+                                if (u1.first_name === null && u2.first_name !== null) return -1
+                                else if (u1.first_name !== null && u2.first_name === null) return 1
+                                else return 0
+                            } else if (u1.last_name! < u2.last_name!) return -1
+                            else if (u1.last_name! > u2.last_name!) return 1
+                            else {
+                                if (u1.first_name! < u2.first_name!) return -1
+                                else if (u1.first_name! > u2.first_name!) return 1
+                                else return 0
+                            }
+                        }),
+                ),
             () => {
                 // handle error
             },

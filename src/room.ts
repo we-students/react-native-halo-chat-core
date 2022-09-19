@@ -2,7 +2,7 @@
 import type { MessageType, Room, User } from './types'
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage'
-import { CollectionName, userToPreview } from './utils'
+import { CollectionName, MessageTypeEmoji, userToPreview } from './utils'
 import auth from '@react-native-firebase/auth'
 import { getUser } from './user'
 import { Platform } from 'react-native'
@@ -75,6 +75,32 @@ export const fetchRooms = async (onRoomsUpdate: (rooms: Room[]) => void, onError
         }, onError)
 }
 
+const finalizeSendMessage = async (roomId: string, messageData: any): Promise<void> => {
+    const roomRef = firestore().collection(CollectionName.ROOMS).doc(roomId)
+    const messageRef = roomRef.collection(CollectionName.MESSAGES).doc()
+    const message: MessageType.Any = {
+        id: messageRef.id,
+        ...messageData,
+    }
+
+    const messagePreview = {
+        id: messageRef.id,
+        type: message.content_type,
+        text:
+            (MessageTypeEmoji[message.content_type] ? MessageTypeEmoji[message.content_type] + ' ' : '') +
+            (message.text || ''),
+        sent_at: message.created_at,
+        sent_by: message.created_by,
+    }
+
+    await firestore().runTransaction(async (transaction) => {
+        await transaction.set(messageRef, message)
+        await transaction.update(roomRef, {
+            last_message: messagePreview,
+        })
+    })
+}
+
 export const sendTextMessage = async ({
     roomId,
     text,
@@ -87,14 +113,7 @@ export const sendTextMessage = async ({
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
 
-    const messageDocRef = firestore()
-        .collection(CollectionName.ROOMS)
-        .doc(roomId)
-        .collection(CollectionName.MESSAGES)
-        .doc()
-
-    const message: MessageType.Text = {
-        id: messageDocRef.id,
+    const message = {
         text,
         created_by: currentFirebaseUser.uid,
         created_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
@@ -106,7 +125,7 @@ export const sendTextMessage = async ({
         read: false,
     }
 
-    await messageDocRef.set(message)
+    await finalizeSendMessage(roomId, message)
 }
 
 export const sendFileMessage = async ({
@@ -154,14 +173,7 @@ export const sendFileMessage = async ({
     const uri = Platform.OS === 'ios' ? file.uri : (await RNFetchBlob.fs.stat(file.uri)).path
     await attachmentRef.putFile(uri)
 
-    const messageDocRef = firestore()
-        .collection(CollectionName.ROOMS)
-        .doc(roomId)
-        .collection(CollectionName.MESSAGES)
-        .doc()
-
-    const message: MessageType.File = {
-        id: messageDocRef.id,
+    const message = {
         room: roomId,
         content_type,
         text: text || null,
@@ -178,7 +190,7 @@ export const sendFileMessage = async ({
         metadata: metadata || null,
     }
 
-    await messageDocRef.set(message)
+    await finalizeSendMessage(roomId, message)
 }
 
 export const sendFileMessageWithUrl = async ({
@@ -208,14 +220,7 @@ export const sendFileMessageWithUrl = async ({
         content_type = 'AUDIO'
     }
 
-    const messageDocRef = firestore()
-        .collection(CollectionName.ROOMS)
-        .doc(roomId)
-        .collection(CollectionName.MESSAGES)
-        .doc()
-
-    const message: MessageType.File = {
-        id: messageDocRef.id,
+    const message = {
         room: roomId,
         content_type,
         text: text || null,
@@ -232,7 +237,7 @@ export const sendFileMessageWithUrl = async ({
         metadata: metadata || null,
     }
 
-    await messageDocRef.set(message)
+    await finalizeSendMessage(roomId, message)
 }
 
 export const messageDelivered = async (roomId: string, messageId: string): Promise<void> => {
@@ -261,6 +266,7 @@ export const deleteMessage = async (roomId: string, messageId: string): Promise<
         .doc(messageId)
         .delete()
 }
+
 export const fetchMessages = (
     roomId: string,
     onMessagesUpdate: (messages: MessageType.Any[]) => void,

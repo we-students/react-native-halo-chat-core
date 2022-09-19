@@ -29,6 +29,7 @@ export interface Room {
         id: string
         text: string | null
         type: MessageType.ContentType
+        sent_by: string
         sent_at: FirebaseFirestoreTypes.Timestamp
     } | null
 }

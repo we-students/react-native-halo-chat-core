@@ -15,9 +15,23 @@ const HomeScreen = ({ navigation }: ScreenProps): JSX.Element => {
     }
 
     React.useEffect(() => {
-        HaloChat.RoomActions.fetchRooms(setRooms, () => {
-            // handle error
-        })
+        HaloChat.RoomActions.fetchRooms(
+            (updatedRooms) =>
+                setRooms(
+                    updatedRooms.sort((r1, r2) => {
+                        const r1Time = r1.last_message
+                            ? r1.last_message.sent_at.toDate().getTime()
+                            : r1.created_at.toDate().getTime()
+                        const r2Time = r2.last_message
+                            ? r2.last_message.sent_at.toDate().getTime()
+                            : r2.created_at.toDate().getTime()
+                        return r2Time - r1Time
+                    }),
+                ),
+            () => {
+                // handle error
+            },
+        )
     }, [])
 
     const renderUser = React.useCallback(

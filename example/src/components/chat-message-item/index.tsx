@@ -5,6 +5,7 @@ import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-nati
 import type * as HaloChat from '@westudents/react-native-halo-chat-core'
 import Video from 'react-native-video'
 import * as HeroIcons from 'react-native-heroicons/solid'
+import { format } from 'date-fns'
 
 interface ChatMessageBubbleProps {
     message: HaloChat.Types.MessageType.Any
@@ -21,16 +22,28 @@ interface MessageBubbleProps<T> {
 
 const TextMessageBubble = ({ message, isMine }: MessageBubbleProps<HaloChat.Types.MessageType.Text>): JSX.Element => {
     return (
-        <View
-            style={[
-                styles.bubble,
-                {
-                    backgroundColor: isMine ? '#005ff0' : '#009ff0',
-                    borderBottomLeftRadius: isMine ? 8 : 0,
-                    borderBottomRightRadius: isMine ? 0 : 8,
-                },
-            ]}>
-            <Text style={[{ color: '#fff' }]}>{message.text}</Text>
+        <View style={styles.bubbleWrapper}>
+            {isMine ? (
+                <Text style={[styles.bubbleDate, { marginRight: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
+            ) : null}
+            <View
+                style={[
+                    styles.bubble,
+                    {
+                        backgroundColor: isMine ? '#005ff0' : '#009ff0',
+                        borderBottomLeftRadius: isMine ? 8 : 0,
+                        borderBottomRightRadius: isMine ? 0 : 8,
+                    },
+                ]}>
+                <Text style={[{ color: '#fff' }]}>{message.text}</Text>
+            </View>
+            {!isMine ? (
+                <Text style={[styles.bubbleDate, { marginLeft: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
+            ) : null}
         </View>
     )
 }
@@ -39,25 +52,37 @@ const ImageMessageBubble = ({ message, isMine }: MessageBubbleProps<HaloChat.Typ
     const { width: screenWidth } = Dimensions.get('screen')
 
     return (
-        <View
-            style={[
-                styles.bubble,
-                {
-                    backgroundColor: isMine ? '#005ff0' : '#009ff0',
-                    borderBottomLeftRadius: isMine ? 8 : 0,
-                    borderBottomRightRadius: isMine ? 0 : 8,
-                    padding: 0,
-                },
-            ]}>
-            <Image
-                source={{ uri: message.file.uri }}
-                style={{
-                    width: screenWidth / 2,
-                    height: screenWidth / 2,
-                }}
-            />
-            {message.text !== null ? (
-                <Text style={[{ color: '#fff', margin: 8, marginTop: 4 }]}>{message.text}</Text>
+        <View style={styles.bubbleWrapper}>
+            {isMine ? (
+                <Text style={[styles.bubbleDate, { marginRight: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
+            ) : null}
+            <View
+                style={[
+                    styles.bubble,
+                    {
+                        backgroundColor: isMine ? '#005ff0' : '#009ff0',
+                        borderBottomLeftRadius: isMine ? 8 : 0,
+                        borderBottomRightRadius: isMine ? 0 : 8,
+                        padding: 0,
+                    },
+                ]}>
+                <Image
+                    source={{ uri: message.file.uri }}
+                    style={{
+                        width: screenWidth / 2,
+                        height: screenWidth / 2,
+                    }}
+                />
+                {message.text !== null ? (
+                    <Text style={[{ color: '#fff', margin: 8, marginTop: 4 }]}>{message.text}</Text>
+                ) : null}
+            </View>
+            {!isMine ? (
+                <Text style={[styles.bubbleDate, { marginLeft: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
             ) : null}
         </View>
     )
@@ -67,92 +92,117 @@ const VideoMessageBubble = ({ message, isMine }: MessageBubbleProps<HaloChat.Typ
     const { width: screenWidth } = Dimensions.get('screen')
     const [paused, setPaused] = React.useState<boolean>(true)
     return (
-        <View
-            style={[
-                styles.bubble,
-                {
-                    backgroundColor: isMine ? '#005ff0' : '#009ff0',
-                    borderBottomLeftRadius: isMine ? 8 : 0,
-                    borderBottomRightRadius: isMine ? 0 : 8,
-                    padding: 0,
-                },
-            ]}>
+        <View style={styles.bubbleWrapper}>
+            {isMine ? (
+                <Text style={[styles.bubbleDate, { marginRight: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
+            ) : null}
             <View
-                style={{
-                    width: screenWidth / 2,
-                    height: screenWidth / 2,
-                }}>
-                <Video
-                    source={{ uri: message.file.uri }}
-                    poster={message.file.uri}
-                    style={{
-                        width: screenWidth / 2,
-                        height: screenWidth / 2,
-                    }}
-                    resizeMode="contain"
-                    paused={paused}
-                />
+                style={[
+                    styles.bubble,
+                    {
+                        backgroundColor: isMine ? '#005ff0' : '#009ff0',
+                        borderBottomLeftRadius: isMine ? 8 : 0,
+                        borderBottomRightRadius: isMine ? 0 : 8,
+                        padding: 0,
+                    },
+                ]}>
                 <View
                     style={{
                         width: screenWidth / 2,
                         height: screenWidth / 2,
-                        position: 'absolute',
                     }}>
-                    <Image
+                    <Video
+                        source={{ uri: message.file.uri }}
+                        poster={message.file.uri}
                         style={{
                             width: screenWidth / 2,
                             height: screenWidth / 2,
-                            bottom: 0,
-                            right: 0,
                         }}
                         resizeMode="contain"
-                        source={{ uri: message.file.uri }}
+                        paused={paused}
                     />
-                    <Pressable
+                    <View
                         style={{
+                            width: screenWidth / 2,
+                            height: screenWidth / 2,
                             position: 'absolute',
-                            top: screenWidth / 4 - 16,
-                            left: screenWidth / 4 - 16,
-                        }}
-                        onPress={(): void => setPaused((v) => !v)}>
-                        {paused ? (
-                            <HeroIcons.PlayIcon color="#fff" size={32} opacity={0.7} />
-                        ) : (
-                            <HeroIcons.StopIcon color="#fff" size={32} opacity={0.7} />
-                        )}
-                    </Pressable>
+                        }}>
+                        <Image
+                            style={{
+                                width: screenWidth / 2,
+                                height: screenWidth / 2,
+                                bottom: 0,
+                                right: 0,
+                            }}
+                            resizeMode="contain"
+                            source={{ uri: message.file.uri }}
+                        />
+                        <Pressable
+                            style={{
+                                position: 'absolute',
+                                top: screenWidth / 4 - 16,
+                                left: screenWidth / 4 - 16,
+                            }}
+                            onPress={(): void => setPaused((v) => !v)}>
+                            {paused ? (
+                                <HeroIcons.PlayIcon color="#fff" size={32} opacity={0.7} />
+                            ) : (
+                                <HeroIcons.StopIcon color="#fff" size={32} opacity={0.7} />
+                            )}
+                        </Pressable>
+                    </View>
+                    <View />
                 </View>
-                <View />
+                {message.text !== null ? (
+                    <Text style={[{ color: '#fff', margin: 8, marginTop: 4 }]}>{message.text}</Text>
+                ) : null}
             </View>
-            {message.text !== null ? (
-                <Text style={[{ color: '#fff', margin: 8, marginTop: 4 }]}>{message.text}</Text>
+            {!isMine ? (
+                <Text style={[styles.bubbleDate, { marginLeft: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
             ) : null}
         </View>
     )
 }
 
 const AudioMessageBubble = ({
+    message,
     isMine,
     onRequestHandleAudioPlaying,
     playing,
 }: MessageBubbleProps<HaloChat.Types.MessageType.File>): JSX.Element => {
     return (
-        <View
-            style={[
-                styles.bubble,
-                {
-                    backgroundColor: isMine ? '#005ff0' : '#009ff0',
-                    borderBottomLeftRadius: isMine ? 8 : 0,
-                    borderBottomRightRadius: isMine ? 0 : 8,
-                },
-            ]}>
-            <Pressable onPress={onRequestHandleAudioPlaying}>
-                {playing ? (
-                    <HeroIcons.StopIcon color="#fff" size={32} />
-                ) : (
-                    <HeroIcons.PlayIcon color="#fff" size={32} />
-                )}
-            </Pressable>
+        <View style={styles.bubbleWrapper}>
+            {isMine ? (
+                <Text style={[styles.bubbleDate, { marginRight: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
+            ) : null}
+            <View
+                style={[
+                    styles.bubble,
+                    {
+                        backgroundColor: isMine ? '#005ff0' : '#009ff0',
+                        borderBottomLeftRadius: isMine ? 8 : 0,
+                        borderBottomRightRadius: isMine ? 0 : 8,
+                    },
+                ]}>
+                <Pressable onPress={onRequestHandleAudioPlaying}>
+                    {playing ? (
+                        <HeroIcons.StopIcon color="#fff" size={32} />
+                    ) : (
+                        <HeroIcons.PlayIcon color="#fff" size={32} />
+                    )}
+                </Pressable>
+            </View>
+            {!isMine ? (
+                <Text style={[styles.bubbleDate, { marginLeft: 8 }]}>
+                    {format(message.created_at.toDate(), 'HH:mm')}
+                </Text>
+            ) : null}
         </View>
     )
 }
@@ -195,6 +245,13 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 8,
         overflow: 'hidden',
+    },
+    bubbleWrapper: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+    },
+    bubbleDate: {
+        color: '#5d5d5d',
     },
 })
 
