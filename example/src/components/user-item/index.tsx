@@ -1,10 +1,10 @@
 import * as React from 'react'
-import type { User } from '@westudents/react-native-halo-chat-core'
+import type * as HaloChat from '@westudents/react-native-halo-chat-core'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Image, StyleSheet, Text, View } from 'react-native'
 
 interface UserItemProps {
-    user: User
+    user: HaloChat.Types.User
     onPress: () => void
 }
 const UserItem = ({ user, onPress }: UserItemProps): JSX.Element => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { MessageType, Room, User } from './types'
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage'
@@ -103,7 +104,6 @@ export const sendTextMessage = async ({
         content_type: 'TEXT',
         delivered: false,
         read: false,
-        deleted_by: [],
     }
 
     await messageDocRef.set(message)
@@ -173,7 +173,6 @@ export const sendFileMessage = async ({
             name: file.filename,
             uri: await attachmentRef.getDownloadURL(),
         },
-        deleted_by: [],
         delivered: false,
         read: false,
         metadata: metadata || null,
@@ -197,7 +196,6 @@ export const sendFileMessageWithUrl = async ({
     }
     metadata?: Record<string, any>
 }): Promise<void> => {
-    // todo:
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
 
@@ -229,7 +227,6 @@ export const sendFileMessageWithUrl = async ({
             name: file.filename,
             uri: file.url,
         },
-        deleted_by: [],
         delivered: false,
         read: false,
         metadata: metadata || null,
@@ -256,6 +253,14 @@ export const messageRead = async (roomId: string, messageId: string): Promise<vo
         .update({ read: true })
 }
 
+export const deleteMessage = async (roomId: string, messageId: string): Promise<void> => {
+    await firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .collection(CollectionName.MESSAGES)
+        .doc(messageId)
+        .delete()
+}
 export const fetchMessages = (
     roomId: string,
     onMessagesUpdate: (messages: MessageType.Any[]) => void,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 
 export interface User {
@@ -47,7 +48,6 @@ export namespace MessageType {
         read: boolean
         created_at: FirebaseFirestoreTypes.Timestamp
         updated_at: FirebaseFirestoreTypes.Timestamp
-        deleted_by: string[]
     }
 
     export interface Text extends Base {

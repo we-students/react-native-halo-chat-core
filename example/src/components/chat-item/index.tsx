@@ -1,11 +1,11 @@
 import * as React from 'react'
-import type { Room, User } from '@westudents/react-native-halo-chat-core'
+import type * as HaloChat from '@westudents/react-native-halo-chat-core'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Image, StyleSheet, Text, View } from 'react-native'
 
 interface ChatItemProps {
-    user: User
-    room: Room
+    user: HaloChat.Types.User
+    room: HaloChat.Types.Room
     onPress: () => void
 }
 const ChatItem = ({ room, user, onPress }: ChatItemProps): JSX.Element => {

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
-import { getUser } from '@westudents/react-native-halo-chat-core'
+import * as HaloChat from '@westudents/react-native-halo-chat-core'
 import { useUser } from '../user'
 
 const Stack = createStackNavigator()
@@ -38,7 +38,7 @@ const NavigationProvider = (): JSX.Element => {
         const handleOnAuthStateChanged = (fbUser: FirebaseAuthTypes.User | null): void => {
             setLogged(fbUser !== null)
             if (fbUser) {
-                getUser(fbUser.uid).then((user) => setUser(user))
+                HaloChat.UserActions.getUser(fbUser.uid).then((user) => setUser(user))
             }
         }
         const subscriber = auth().onAuthStateChanged(handleOnAuthStateChanged)

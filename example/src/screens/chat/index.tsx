@@ -2,13 +2,7 @@ import type { ScreenProps } from '../../types'
 import * as React from 'react'
 import { FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RouteProp } from '@react-navigation/native'
-import {
-    fetchMessages,
-    MessageType,
-    Room,
-    sendFileMessage,
-    sendTextMessage,
-} from '@westudents/react-native-halo-chat-core'
+import * as HaloChat from '@westudents/react-native-halo-chat-core'
 import { useUser } from '../../providers/user'
 import ChatInput from '../../components/chat-input'
 import * as HeroIcons from 'react-native-heroicons/outline'
@@ -16,14 +10,14 @@ import ChatMessageItem from '../../components/chat-message-item'
 import type { Asset } from 'react-native-image-picker'
 import AudioRecorderPlayer from 'react-native-audio-recorder-player'
 
-type ChatScreenRouteType = RouteProp<{ Chat: { room: Room } }, 'Chat'>
+type ChatScreenRouteType = RouteProp<{ Chat: { room: HaloChat.Types.Room } }, 'Chat'>
 
 const audioPlayer = new AudioRecorderPlayer()
 
 const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JSX.Element => {
     const { user } = useUser()
     const [chatName, setChatName] = React.useState<string>()
-    const [messages, setMessages] = React.useState<MessageType.Any[]>()
+    const [messages, setMessages] = React.useState<HaloChat.Types.MessageType.Any[]>()
 
     const [currentAudioPlaying, setCurrentAudioPlaying] = React.useState<string>()
 
@@ -33,7 +27,7 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
 
     const handleSendMessage = ({ text, file }: { text?: string; file?: Asset }): void => {
         if (file !== undefined && file.fileName && file.uri && file.type) {
-            sendFileMessage({
+            HaloChat.RoomActions.sendFileMessage({
                 roomId: room.id,
                 text,
                 file: {
@@ -43,12 +37,12 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
                 },
             })
         } else if (text !== undefined) {
-            sendTextMessage({ roomId: room.id, text })
+            HaloChat.RoomActions.sendTextMessage({ roomId: room.id, text })
         }
     }
 
     const handleSendAudio = (filePath: string): void => {
-        sendFileMessage({
+        HaloChat.RoomActions.sendFileMessage({
             roomId: room.id,
             file: {
                 filename: `${new Date().toISOString()}_${filePath.split('/').reverse()[0]}`,
@@ -59,8 +53,7 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
     }
 
     const handleAudioPlaying = React.useCallback(
-        async (message: MessageType.File): Promise<void> => {
-            // todo:
+        async (message: HaloChat.Types.MessageType.File): Promise<void> => {
             if (currentAudioPlaying !== undefined) {
                 await audioPlayer.stopPlayer()
             }
@@ -75,12 +68,12 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
     )
 
     const renderMessage = React.useCallback(
-        ({ item }: { item: MessageType.Any }) => {
+        ({ item }: { item: HaloChat.Types.MessageType.Any }) => {
             return (
                 <ChatMessageItem
                     message={item}
                     onRequestHandleAudioPlaying={(): void => {
-                        handleAudioPlaying(item as MessageType.File)
+                        handleAudioPlaying(item as HaloChat.Types.MessageType.File)
                     }}
                     playing={currentAudioPlaying === item.id}
                 />
@@ -92,7 +85,7 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
     const renderDivider = React.useCallback((): JSX.Element => <View style={styles.divider} />, [])
 
     React.useEffect(() => {
-        fetchMessages(
+        HaloChat.RoomActions.fetchMessages(
             room.id,
             (data) => {
                 setMessages(data)

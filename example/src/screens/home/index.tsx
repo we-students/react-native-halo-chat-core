@@ -2,26 +2,26 @@ import { useUser } from '../../providers/user'
 import * as React from 'react'
 import { Button, FlatList, Platform, StyleSheet, Text, View } from 'react-native'
 import auth from '@react-native-firebase/auth'
-import { Room, fetchRooms } from '@westudents/react-native-halo-chat-core'
+import * as HaloChat from '@westudents/react-native-halo-chat-core'
 import type { ScreenProps } from '../../types'
 import ChatItem from '../../components/chat-item'
 
 const HomeScreen = ({ navigation }: ScreenProps): JSX.Element => {
     const { user } = useUser()
-    const [rooms, setRooms] = React.useState<Room[]>()
+    const [rooms, setRooms] = React.useState<HaloChat.Types.Room[]>()
 
     const signOut = (): void => {
         auth().signOut()
     }
 
     React.useEffect(() => {
-        fetchRooms(setRooms, () => {
+        HaloChat.RoomActions.fetchRooms(setRooms, () => {
             // handle error
         })
     }, [])
 
     const renderUser = React.useCallback(
-        ({ item }: { item: Room }): JSX.Element | null => {
+        ({ item }: { item: HaloChat.Types.Room }): JSX.Element | null => {
             return user ? (
                 <ChatItem user={user} room={item} onPress={(): void => navigation.navigate('Chat', { room: item })} />
             ) : null

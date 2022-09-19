@@ -1,7 +1,7 @@
 import type { ScreenProps } from '../../types'
 import * as React from 'react'
 import { Button, FlatList, Platform, StyleSheet, Text, View } from 'react-native'
-import { createRoomWithUsers, fetchUsers, User } from '@westudents/react-native-halo-chat-core'
+import * as HaloChat from '@westudents/react-native-halo-chat-core'
 import { useUser } from '../../providers/user'
 import { StackActions } from '@react-navigation/native'
 import UserItem from '../../components/user-item'
@@ -9,10 +9,10 @@ import UserItem from '../../components/user-item'
 const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
     const { user } = useUser()
 
-    const [users, setUsers] = React.useState<User[]>()
+    const [users, setUsers] = React.useState<HaloChat.Types.User[]>()
 
     React.useEffect(() => {
-        fetchUsers(
+        HaloChat.UserActions.fetchUsers(
             (newUsers) => setUsers(newUsers.filter((u) => u.id !== user?.id)),
             () => {
                 // handle error
@@ -21,9 +21,9 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
     }, [user?.id])
 
     const handleCreateChat = React.useCallback(
-        async (otherUser: User): Promise<void> => {
+        async (otherUser: HaloChat.Types.User): Promise<void> => {
             if (user) {
-                const room = await createRoomWithUsers([otherUser])
+                const room = await HaloChat.RoomActions.createRoomWithUsers([otherUser])
                 navigation.dispatch(StackActions.replace('Chat', { room }))
             }
         },
@@ -32,7 +32,7 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
     )
 
     const renderUser = React.useCallback(
-        ({ item }: { item: User }): JSX.Element => {
+        ({ item }: { item: HaloChat.Types.User }): JSX.Element => {
             return (
                 <UserItem
                     user={item}

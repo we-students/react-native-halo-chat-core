@@ -2,12 +2,12 @@
 import { useUser } from '../../providers/user'
 import * as React from 'react'
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import type { MessageType } from '@westudents/react-native-halo-chat-core'
+import type * as HaloChat from '@westudents/react-native-halo-chat-core'
 import Video from 'react-native-video'
 import * as HeroIcons from 'react-native-heroicons/solid'
 
 interface ChatMessageBubbleProps {
-    message: MessageType.Any
+    message: HaloChat.Types.MessageType.Any
     onRequestHandleAudioPlaying: () => void
     playing: boolean
 }
@@ -19,7 +19,7 @@ interface MessageBubbleProps<T> {
     playing?: boolean
 }
 
-const TextMessageBubble = ({ message, isMine }: MessageBubbleProps<MessageType.Text>): JSX.Element => {
+const TextMessageBubble = ({ message, isMine }: MessageBubbleProps<HaloChat.Types.MessageType.Text>): JSX.Element => {
     return (
         <View
             style={[
@@ -35,7 +35,7 @@ const TextMessageBubble = ({ message, isMine }: MessageBubbleProps<MessageType.T
     )
 }
 
-const ImageMessageBubble = ({ message, isMine }: MessageBubbleProps<MessageType.File>): JSX.Element => {
+const ImageMessageBubble = ({ message, isMine }: MessageBubbleProps<HaloChat.Types.MessageType.File>): JSX.Element => {
     const { width: screenWidth } = Dimensions.get('screen')
 
     return (
@@ -63,7 +63,7 @@ const ImageMessageBubble = ({ message, isMine }: MessageBubbleProps<MessageType.
     )
 }
 
-const VideoMessageBubble = ({ message, isMine }: MessageBubbleProps<MessageType.File>): JSX.Element => {
+const VideoMessageBubble = ({ message, isMine }: MessageBubbleProps<HaloChat.Types.MessageType.File>): JSX.Element => {
     const { width: screenWidth } = Dimensions.get('screen')
     const [paused, setPaused] = React.useState<boolean>(true)
     return (
@@ -135,7 +135,7 @@ const AudioMessageBubble = ({
     isMine,
     onRequestHandleAudioPlaying,
     playing,
-}: MessageBubbleProps<MessageType.File>): JSX.Element => {
+}: MessageBubbleProps<HaloChat.Types.MessageType.File>): JSX.Element => {
     return (
         <View
             style={[
@@ -164,15 +164,15 @@ const ChatMessageItem = ({ message, onRequestHandleAudioPlaying, playing }: Chat
     const bubble = React.useMemo((): JSX.Element | null => {
         switch (message.content_type) {
             case 'TEXT':
-                return <TextMessageBubble message={message as MessageType.Text} isMine={isMine} />
+                return <TextMessageBubble message={message as HaloChat.Types.MessageType.Text} isMine={isMine} />
             case 'IMAGE':
-                return <ImageMessageBubble message={message as MessageType.File} isMine={isMine} />
+                return <ImageMessageBubble message={message as HaloChat.Types.MessageType.File} isMine={isMine} />
             case 'VIDEO':
-                return <VideoMessageBubble message={message as MessageType.File} isMine={isMine} />
+                return <VideoMessageBubble message={message as HaloChat.Types.MessageType.File} isMine={isMine} />
             case 'AUDIO':
                 return (
                     <AudioMessageBubble
-                        message={message as MessageType.File}
+                        message={message as HaloChat.Types.MessageType.File}
                         isMine={isMine}
                         onRequestHandleAudioPlaying={onRequestHandleAudioPlaying}
                         playing={playing}

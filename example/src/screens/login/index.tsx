@@ -2,7 +2,7 @@ import { useUser } from '../../providers/user'
 import * as React from 'react'
 import { Button, StyleSheet, Text, View } from 'react-native'
 import auth from '@react-native-firebase/auth'
-import { createUser } from '@westudents/react-native-halo-chat-core'
+import * as HaloChat from '@westudents/react-native-halo-chat-core'
 
 const firstNames = ['Paolo', 'Matteo', 'Rocco', 'Giuseppe', 'Giorgia', 'Federica', 'Ferdinando']
 const lastNames = ['Giardino', 'Destefains', 'Di Bello', 'Morabito', 'Scarcella', 'Sapino', 'Nocera']
@@ -20,7 +20,7 @@ const LoginScreen = (): JSX.Element => {
 
     const signIn = async (): Promise<void> => {
         const userCredentials = await auth().signInAnonymously()
-        const u = await createUser({
+        const u = await HaloChat.UserActions.createUser({
             id: userCredentials.user.uid,
             firstName: randomFirstName(),
             lastName: randomLastName(),
