@@ -69,4 +69,5 @@ lib/
 
 # Firebase Config
 #
-example/ios/GoogleService-Info.plist
+GoogleService-Info.plist
+google-services.json

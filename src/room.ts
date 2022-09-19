@@ -71,7 +71,7 @@ export const fetchRooms = async (onRoomsUpdate: (rooms: Room[]) => void, onError
         .collection(CollectionName.ROOMS)
         .where('users_ids', 'array-contains', currentFirebaseUser.uid)
         .onSnapshot((snapshop) => {
-            onRoomsUpdate(snapshop.docs.map((rDoc) => rDoc.data() as Room))
+            onRoomsUpdate(snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null))
         }, onError)
 }
 
