@@ -1,28 +1,30 @@
 import * as React from 'react'
 import type * as HaloChat from '@westudents/react-native-halo-chat-core'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { format, isToday } from 'date-fns'
+import Avatar from '../avatar'
+import { useAuth } from '../../providers/auth'
 
 interface ChatItemProps {
-    user: HaloChat.Types.User
     room: HaloChat.Types.Room
     onPress: () => void
 }
-const ChatItem = ({ room, user, onPress }: ChatItemProps): JSX.Element => {
+const ChatItem = ({ room, onPress }: ChatItemProps): JSX.Element => {
+    const { user } = useAuth()
     const u = room.users.find((cu) => cu.id !== user?.id)
     return (
         <TouchableOpacity style={styles.userItem} onPress={onPress}>
-            {u?.image === undefined || u?.image === null ? (
-                <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{`${u?.first_name?.[0]}${u?.last_name?.[0]}`}</Text>
-                </View>
-            ) : (
-                <Image source={{ uri: u.image }} style={styles.avatar} />
-            )}
+            <Avatar user={u} size={52} />
             <View style={styles.roomDetails}>
                 <View style={styles.userNameWrapper}>
-                    <Text style={styles.userName}>{`${u?.first_name} ${u?.last_name}`}</Text>
+                    <Text style={styles.userName}>
+                        {room.created_by === user?.id
+                            ? `${room.tag}`
+                            : `${u?.first_name} ${u?.last_name}${
+                                  room.scope === 'AGENT' && room.tag ? ` (${room.tag})` : ''
+                              }`}
+                    </Text>
                     {room.last_message ? (
                         <View style={styles.lastMessageWrapper}>
                             <Text>{room.last_message.text}</Text>
@@ -54,19 +56,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '700',
         color: '#009ff0',
-    },
-    avatar: {
-        height: 52,
-        width: 52,
-        borderRadius: 26,
-        backgroundColor: '#009ff0',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    avatarText: {
-        color: '#fff',
-        fontWeight: '700',
-        fontSize: 22,
     },
     lastMessageWrapper: {
         flexDirection: 'row',

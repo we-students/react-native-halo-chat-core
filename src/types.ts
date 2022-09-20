@@ -16,6 +16,15 @@ export interface UserPreview {
     image: string | null
 }
 
+export interface Agent {
+    id: string
+    first_name: string
+    last_name: string
+    image: string | null
+    created_at: FirebaseFirestoreTypes.Timestamp
+    tags: string[]
+}
+
 export interface Room {
     id: string
     created_by: string
@@ -23,8 +32,9 @@ export interface Room {
     users_ids: string[]
     users: UserPreview[]
     scope: 'PRIVATE' | 'GROUP' | 'AGENT'
-    tags: string[] | null
+    tag: string | null
     name: string | null
+    agent: UserPreview | null
     last_message: {
         id: string
         text: string | null

@@ -3,27 +3,26 @@ import * as React from 'react'
 import { FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RouteProp } from '@react-navigation/native'
 import * as HaloChat from '@westudents/react-native-halo-chat-core'
-import { useUser } from '../../providers/user'
+import { useAuth } from '../../providers/auth'
 import ChatInput from '../../components/chat-input'
 import * as HeroIcons from 'react-native-heroicons/outline'
 import ChatMessageItem from '../../components/chat-message-item'
 import type { Asset } from 'react-native-image-picker'
 import AudioRecorderPlayer from 'react-native-audio-recorder-player'
+import Button from '../../components/button'
 
 type ChatScreenRouteType = RouteProp<{ Chat: { room: HaloChat.Types.Room } }, 'Chat'>
 
 const audioPlayer = new AudioRecorderPlayer()
 
 const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JSX.Element => {
-    const { user } = useUser()
+    const { user } = useAuth()
     const [chatName, setChatName] = React.useState<string>()
     const [messages, setMessages] = React.useState<HaloChat.Types.MessageType.Any[]>()
 
     const [currentAudioPlaying, setCurrentAudioPlaying] = React.useState<string>()
 
-    const {
-        params: { room },
-    } = route
+    const [room, setRoom] = React.useState<HaloChat.Types.Room>(route.params.room)
 
     const handleSendMessage = ({ text, file }: { text?: string; file?: Asset }): void => {
         if (file !== undefined && file.fileName && file.uri && file.type) {
@@ -98,8 +97,23 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
         if (room.scope === 'PRIVATE') {
             const otherUser = room.users.find((u) => u.id !== user?.id)
             setChatName(`${otherUser?.first_name} ${otherUser?.last_name}`)
+        } else if (room.scope === 'GROUP') {
+            setChatName(room.name || '')
+        } else if (room.scope === 'AGENT') {
+            const otherUser = room.users[0]
+            setChatName(
+                user?.id === room.created_by
+                    ? `${room.tag}`
+                    : `${otherUser?.first_name} ${otherUser?.last_name} (${room.tag})`,
+            )
         }
-    }, [room.scope, room.users, user?.id])
+    }, [room, user?.id])
+
+    const handleEnableChat = async (): Promise<void> => {
+        // todo:
+        const r = await HaloChat.RoomActions.joinAgent(room.id)
+        setRoom(r)
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -122,7 +136,14 @@ const ChatScreen = ({ navigation, route }: ScreenProps<ChatScreenRouteType>): JS
                 showsVerticalScrollIndicator={false}
                 inverted
             />
-            <ChatInput onSendMessage={handleSendMessage} onSendAudio={handleSendAudio} />
+            {room.scope === 'AGENT' && room.agent === null ? (
+                <View
+                    style={{ backgroundColor: '#009ff0', height: 90, justifyContent: 'center', paddingHorizontal: 25 }}>
+                    <Button title="ENABLE" onPress={handleEnableChat} />
+                </View>
+            ) : (
+                <ChatInput onSendMessage={handleSendMessage} onSendAudio={handleSendAudio} />
+            )}
         </View>
     )
 }

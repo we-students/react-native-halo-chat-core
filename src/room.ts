@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { MessageType, Room, User } from './types'
+import type { MessageType, Room, User, Agent } from './types'
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage'
 import { CollectionName, MessageTypeEmoji, userToPreview } from './utils'
@@ -7,6 +7,7 @@ import auth from '@react-native-firebase/auth'
 import { getUser } from './user'
 import { Platform } from 'react-native'
 import RNFetchBlob from 'rn-fetch-blob'
+import { getAgent } from './agent'
 
 /**
  * It creates a room with the given users
@@ -40,9 +41,10 @@ export const createRoomWithUsers = async (users: User[], name?: string): Promise
         users: [userToPreview(creator), ...users.map((u) => userToPreview(u))],
         users_ids: [creator.id, ...users.map((u) => u.id)],
         scope: users.length > 1 ? 'GROUP' : 'PRIVATE',
-        tags: null,
+        tag: null,
         name: name || null,
         last_message: null,
+        agent: null,
     }
     await docRef.set(room)
     return room
@@ -50,10 +52,10 @@ export const createRoomWithUsers = async (users: User[], name?: string): Promise
 
 /**
  * It creates a room with the current user and the agent
- * @param {string[]} tags - string[]
+ * @param {string[]} tag - string
  * @returns A room object
  */
-export const createRoomWithAgent = async (tags: string[]): Promise<Room> => {
+export const createRoomWithAgent = async (tag: string): Promise<Room> => {
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
     const creator = await getUser(currentFirebaseUser.uid)
@@ -66,12 +68,35 @@ export const createRoomWithAgent = async (tags: string[]): Promise<Room> => {
         users: [userToPreview(creator)],
         users_ids: [creator.id],
         scope: 'AGENT',
-        tags,
+        tag,
         name: null,
         last_message: null,
+        agent: null,
     }
     await docRef.set(room)
     return room
+}
+
+export const joinAgent = async (roomId: string): Promise<Room> => {
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
+    const agent = await getAgent(currentFirebaseUser.uid)
+    if (agent === null) throw new Error('joinAgent: agent not exists')
+
+    await firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .update({
+            agent: {
+                id: agent.id,
+                first_name: agent.first_name,
+                last_name: agent.last_name,
+                image: agent.image,
+            },
+        })
+
+    const res = await firestore().collection(CollectionName.ROOMS).doc(roomId).get()
+    return res.data() as Room
 }
 
 /**
@@ -83,16 +108,30 @@ export const createRoomWithAgent = async (tags: string[]): Promise<Room> => {
  * @param onRoomsUpdate - (rooms: Room[]) => void
  * @param onError - (error: Error) => void
  */
-export const fetchRooms = async (
-    onRoomsUpdate: (rooms: Room[]) => void,
-    onError: (error: Error) => void,
-): Promise<void> => {
+export const fetchRooms = (onRoomsUpdate: (rooms: Room[]) => void, onError: (error: Error) => void): void => {
     const currentFirebaseUser = auth().currentUser
     if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
 
     firestore()
         .collection(CollectionName.ROOMS)
         .where('users_ids', 'array-contains', currentFirebaseUser.uid)
+        .onSnapshot((snapshop) => {
+            onRoomsUpdate(snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null))
+        }, onError)
+}
+
+export const fetchAgentRooms = (
+    agent: Agent,
+    onRoomsUpdate: (rooms: Room[]) => void,
+    onError: (error: Error) => void,
+): void => {
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
+
+    firestore()
+        .collection(CollectionName.ROOMS)
+        .where('scope', '==', 'AGENT')
+        .where('tag', 'in', agent.tags)
         .onSnapshot((snapshop) => {
             onRoomsUpdate(snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null))
         }, onError)

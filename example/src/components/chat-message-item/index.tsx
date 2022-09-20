@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import { useUser } from '../../providers/user'
+import { useAuth } from '../../providers/auth'
 import * as React from 'react'
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import type * as HaloChat from '@westudents/react-native-halo-chat-core'
@@ -208,8 +208,10 @@ const AudioMessageBubble = ({
 }
 
 const ChatMessageItem = ({ message, onRequestHandleAudioPlaying, playing }: ChatMessageBubbleProps): JSX.Element => {
-    const { user } = useUser()
-    const isMine = React.useMemo(() => message.created_by === user?.id, [message.created_by, user?.id])
+    const { user, agent, isAgent } = useAuth()
+    const isMine = React.useMemo(() => {
+        return isAgent && agent ? message.created_by === agent.id : message.created_by === user?.id
+    }, [agent, isAgent, message.created_by, user?.id])
 
     const bubble = React.useMemo((): JSX.Element | null => {
         switch (message.content_type) {

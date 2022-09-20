@@ -1,9 +1,10 @@
 import type { User, UserPreview } from './types'
 
 export const CollectionName = {
-    USERS: 'users',
-    ROOMS: 'rooms',
+    AGENTS: 'agents',
     MESSAGES: 'messages',
+    ROOMS: 'rooms',
+    USERS: 'users',
 }
 
 export const MessageTypeEmoji = {

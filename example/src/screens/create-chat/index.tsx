@@ -1,15 +1,19 @@
 import type { ScreenProps } from '../../types'
 import * as React from 'react'
-import { Button, FlatList, Platform, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Platform, StyleSheet, Text, View } from 'react-native'
 import * as HaloChat from '@westudents/react-native-halo-chat-core'
-import { useUser } from '../../providers/user'
+import { useAuth } from '../../providers/auth'
 import { StackActions } from '@react-navigation/native'
 import UserItem from '../../components/user-item'
+import Button from '../../components/button'
+import TagSelector from '../../components/tag-selector'
 
 const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
-    const { user } = useUser()
+    const { user } = useAuth()
 
     const [users, setUsers] = React.useState<HaloChat.Types.User[]>()
+
+    const [selectedTag, setSelectedTag] = React.useState<string>()
 
     React.useEffect(() => {
         HaloChat.UserActions.fetchUsers(
@@ -70,6 +74,13 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
         navigation.goBack()
     }
 
+    const handleCreateAgentChat = async (): Promise<void> => {
+        if (selectedTag) {
+            const room = await HaloChat.RoomActions.createRoomWithAgent(selectedTag)
+            navigation.dispatch(StackActions.replace('Chat', { room }))
+        }
+    }
+
     return (
         <View style={styles.screenContainer}>
             <View style={styles.header}>
@@ -80,7 +91,24 @@ const CreateChatScreen = ({ navigation }: ScreenProps): JSX.Element => {
                 contentContainerStyle={styles.scrollContenr}
                 renderItem={renderUser}
                 ItemSeparatorComponent={renderDivider}
-                ListFooterComponent={<Button title="back" onPress={handleBack} />}
+                ListHeaderComponent={
+                    <View style={styles.listHeader}>
+                        <Text style={styles.listHeaderTitle}>Customer Service Chat</Text>
+                        <Text>Select the issue scope and open a chat with an agent</Text>
+                        <TagSelector onSelect={(tags): void => setSelectedTag(tags.length > 0 ? tags[0] : undefined)} />
+                        <Button
+                            title="create agent chat"
+                            onPress={handleCreateAgentChat}
+                            disabled={selectedTag === undefined}
+                            style={styles.createChatButton}
+                        />
+                        <View style={styles.listHeaderDivider} />
+                        <Text style={styles.listHeaderTitle}>User to User Chat</Text>
+                    </View>
+                }
+                ListFooterComponent={
+                    <Button title="back" onPress={handleBack} style={styles.backButton} status="secondary" />
+                }
             />
         </View>
     )
@@ -117,6 +145,24 @@ const styles = StyleSheet.create({
         backgroundColor: '#005ff0',
         paddingHorizontal: 25,
         justifyContent: 'flex-end',
+    },
+    backButton: { marginBottom: 32 },
+    listHeader: {
+        paddingTop: 16,
+    },
+    listHeaderTitle: {
+        marginBottom: 4,
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    listHeaderDivider: {
+        height: 1,
+        backgroundColor: '#005aa0',
+        marginVertical: 16,
+    },
+    createChatButton: {
+        marginTop: 12,
+        marginBottom: 0,
     },
 })
 
