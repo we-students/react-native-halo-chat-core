@@ -145,7 +145,8 @@
   },
   "eslintIgnore": [
     "node_modules/",
-    "lib/"
+    "lib/",
+    "example"
   ],
   "react-native-builder-bob": {
     "source": "src",

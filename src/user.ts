@@ -22,6 +22,7 @@ export const createUser = async (payload: CreateUserPayload): Promise<User> => {
         last_name: payload.lastName || null,
         image: payload.image || null,
         created_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        device_token: null,
     }
     await docRef.set(user)
     return user
@@ -49,4 +50,8 @@ export const fetchUsers = (onUsersUpdate: (users: User[]) => void, onError: (err
         .onSnapshot((snapshot) => {
             onUsersUpdate(snapshot.docs.map((u) => u.data() as User))
         }, onError)
+}
+
+export const updateDeviceToken = async (userId: string, token: string): Promise<void> => {
+    await firestore().collection(CollectionName.USERS).doc(userId).update({ device_token: token })
 }

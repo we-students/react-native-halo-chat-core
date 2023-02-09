@@ -7,6 +7,7 @@ export interface User {
     last_name: string | null
     image: string | null
     created_at: FirebaseFirestoreTypes.Timestamp
+    device_token: string | null
 }
 
 export interface UserPreview {
@@ -23,6 +24,7 @@ export interface Agent {
     image: string | null
     created_at: FirebaseFirestoreTypes.Timestamp
     tags: string[]
+    device_token: string | null
 }
 
 export interface Room {

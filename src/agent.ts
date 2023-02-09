@@ -19,6 +19,7 @@ export const createAgent = async (payload: CreateAgentPayload): Promise<Agent> =
         image: payload.image || null,
         tags: payload.tags,
         created_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        device_token: null,
     }
     await docRef.set(agent)
     return agent
@@ -27,4 +28,8 @@ export const createAgent = async (payload: CreateAgentPayload): Promise<Agent> =
 export const getAgent = async (agentId: string): Promise<Agent> => {
     const doc = await firestore().collection(CollectionName.AGENTS).doc(agentId).get()
     return doc.data() as Agent
+}
+
+export const updateDeviceToken = async (agentId: string, token: string): Promise<void> => {
+    await firestore().collection(CollectionName.AGENTS).doc(agentId).update({ device_token: token })
 }
