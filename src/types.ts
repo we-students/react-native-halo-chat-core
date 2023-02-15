@@ -32,11 +32,13 @@ export interface Room {
     created_by: string
     created_at: FirebaseFirestoreTypes.Timestamp
     users_ids: string[]
+    removed_users_ids: string[]
     users: UserPreview[]
     scope: 'PRIVATE' | 'GROUP' | 'AGENT'
     tag: string | null
     name: string | null
     agent: UserPreview | null
+    metadata: Record<string, any> | null
     last_message: {
         id: string
         text: string | null

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { MessageType, Room, User, Agent } from './types'
+import type { MessageType, Room, User, Agent, UserPreview } from './types'
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage'
 import { CollectionName, MessageTypeEmoji, userToPreview } from './utils'
@@ -40,11 +40,13 @@ export const createRoomWithUsers = async (users: User[], name?: string): Promise
         created_by: creator.id,
         users: [userToPreview(creator), ...users.map((u) => userToPreview(u))],
         users_ids: [creator.id, ...users.map((u) => u.id)],
+        removed_users_ids: [],
         scope: users.length > 1 ? 'GROUP' : 'PRIVATE',
         tag: null,
         name: name || null,
         last_message: null,
         agent: null,
+        metadata: null,
     }
     await docRef.set(room)
     return room
@@ -67,11 +69,13 @@ export const createRoomWithAgent = async (tag: string): Promise<Room> => {
         created_by: creator.id,
         users: [userToPreview(creator)],
         users_ids: [creator.id],
+        removed_users_ids: [],
         scope: 'AGENT',
         tag,
         name: null,
         last_message: null,
         agent: null,
+        metadata: null,
     }
     await docRef.set(room)
     return room
@@ -99,6 +103,32 @@ export const joinAgent = async (roomId: string): Promise<Room> => {
     return res.data() as Room
 }
 
+export const joinUser = async (roomId: string): Promise<Room> => {
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('joinUser: Firebase user not authenticated')
+    const user = await getUser(currentFirebaseUser.uid)
+    if (user === null) throw new Error('joinUser: user not exists')
+
+    const oldRoom = (await (await firestore().collection(CollectionName.ROOMS).doc(roomId).get()).data()) as Room
+
+    const usersIds = [...oldRoom.users_ids, user.id]
+
+    await firestore().collection(CollectionName.ROOMS).doc(roomId).update({
+        users_ids: usersIds,
+    })
+
+    const res = (await (await firestore().collection(CollectionName.ROOMS).doc(roomId).get()).data()) as Room
+
+    const users: UserPreview[] = []
+
+    for (const uid of usersIds) {
+        const u = await getUser(uid)
+        users.push(userToPreview(u))
+    }
+
+    return { ...res, users }
+}
+
 /**
  * It fetches all the rooms that the current user is a member of, and then calls the onRoomsUpdate
  * callback with the list of rooms
@@ -115,8 +145,23 @@ export const fetchRooms = (onRoomsUpdate: (rooms: Room[]) => void, onError: (err
     firestore()
         .collection(CollectionName.ROOMS)
         .where('users_ids', 'array-contains', currentFirebaseUser.uid)
-        .onSnapshot((snapshop) => {
-            onRoomsUpdate(snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null))
+        .onSnapshot(async (snapshop) => {
+            const snapshotData = snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null)
+
+            const rooms: Room[] = []
+
+            for (const rData of snapshotData) {
+                const users: UserPreview[] = []
+                for (const uid of rData.users_ids) {
+                    users.push(userToPreview(await getUser(uid)))
+                }
+                for (const uid of rData.removed_users_ids) {
+                    users.push(userToPreview(await getUser(uid)))
+                }
+                rooms.push({ ...rData, users })
+            }
+
+            onRoomsUpdate(rooms)
         }, onError)
 }
 
@@ -132,8 +177,23 @@ export const fetchAgentRooms = (
         .collection(CollectionName.ROOMS)
         .where('scope', '==', 'AGENT')
         .where('tag', 'in', agent.tags)
-        .onSnapshot((snapshop) => {
-            onRoomsUpdate(snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null))
+        .onSnapshot(async (snapshop) => {
+            const snapshotData = snapshop.docs.map((rDoc) => rDoc.data() as Room).filter((r) => r.created_at !== null)
+
+            const rooms: Room[] = []
+
+            for (const rData of snapshotData) {
+                const users: UserPreview[] = []
+                for (const uid of rData.users_ids) {
+                    users.push(userToPreview(await getUser(uid)))
+                }
+                for (const uid of rData.removed_users_ids) {
+                    users.push(userToPreview(await getUser(uid)))
+                }
+                rooms.push({ ...rData, users })
+            }
+
+            onRoomsUpdate(rooms)
         }, onError)
 }
 

@@ -28,6 +28,12 @@ export const createUser = async (payload: CreateUserPayload): Promise<User> => {
     return user
 }
 
+export const updateUser = async ({ id, ...payload }: CreateUserPayload): Promise<User> => {
+    const docRef = firestore().collection(CollectionName.USERS).doc(id)
+    await docRef.update({ ...payload })
+    return (await docRef.get()).data() as User
+}
+
 /**
  * It gets a user from the database
  * @param {string} userId - The user's ID.
