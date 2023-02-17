@@ -1,12 +1,13 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import type { User } from './types'
+import auth from '@react-native-firebase/auth'
 import { CollectionName } from './utils'
 
 interface CreateUserPayload {
-    id: string
     firstName?: string
     lastName?: string
     image?: string
+    nickname?: string
 }
 
 /**
@@ -15,12 +16,17 @@ interface CreateUserPayload {
  * @returns User
  */
 export const createUser = async (payload: CreateUserPayload): Promise<User> => {
-    const docRef = firestore().collection(CollectionName.USERS).doc(payload.id)
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('joinUser: Firebase user not authenticated')
+
+    const docRef = firestore().collection(CollectionName.USERS).doc(currentFirebaseUser.uid)
+
     const user: User = {
-        id: payload.id,
+        id: currentFirebaseUser.uid,
         first_name: payload.firstName || null,
         last_name: payload.lastName || null,
         image: payload.image || null,
+        nickname: payload.nickname || null,
         created_at: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
         device_token: null,
     }
@@ -28,8 +34,11 @@ export const createUser = async (payload: CreateUserPayload): Promise<User> => {
     return user
 }
 
-export const updateUser = async ({ id, ...payload }: CreateUserPayload): Promise<User> => {
-    const docRef = firestore().collection(CollectionName.USERS).doc(id)
+export const updateUser = async (payload: CreateUserPayload): Promise<User> => {
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('joinUser: Firebase user not authenticated')
+
+    const docRef = firestore().collection(CollectionName.USERS).doc(currentFirebaseUser.uid)
     await docRef.update({ ...payload })
     return (await docRef.get()).data() as User
 }

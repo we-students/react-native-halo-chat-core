@@ -6,6 +6,7 @@ export interface User {
     first_name: string | null
     last_name: string | null
     image: string | null
+    nickname: string | null
     created_at: FirebaseFirestoreTypes.Timestamp
     device_token: string | null
 }
