@@ -446,3 +446,23 @@ export const fetchMessages = (
             onError,
         )
 }
+
+export const fetchMedia = async (
+    roomId: string,
+    contentType: MessageType.ContentType,
+): Promise<{ uri: string; mimeType: string | null; name: string }[]> => {
+    const messagesSnapshots = await firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .collection(CollectionName.MESSAGES)
+        .get()
+
+    return messagesSnapshots.docs
+        .sort(
+            (m1, m2) =>
+                (m2.data() as MessageType.Any).created_at.toMillis() -
+                (m1.data() as MessageType.Any).created_at.toMillis(),
+        )
+        .filter((m) => (m.data() as MessageType.Any).content_type === contentType)
+        .map((m) => (m.data() as MessageType.File).file)
+}
