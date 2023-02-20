@@ -248,7 +248,7 @@ export const sendTextMessage = async ({
         room: roomId,
         content_type: 'TEXT',
         delivered: false,
-        read: false,
+        read_by: [],
     }
 
     await finalizeSendMessage(roomId, message)
@@ -316,7 +316,7 @@ export const sendFileMessage = async ({
             uri: await attachmentRef.getDownloadURL(),
         },
         delivered: false,
-        read: false,
+        read_by: [],
         metadata: metadata || null,
     }
 
@@ -367,7 +367,7 @@ export const sendFileMessageWithUrl = async ({
             uri: file.url,
         },
         delivered: false,
-        read: false,
+        read_by: [],
         metadata: metadata || null,
     }
 
@@ -394,12 +394,16 @@ export const messageDelivered = async (roomId: string, messageId: string): Promi
  * @param {string} messageId - The ID of the message to mark as read.
  */
 export const messageRead = async (roomId: string, messageId: string): Promise<void> => {
-    await firestore()
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('createRoomWithUsers: Firebase user not authenticated')
+
+    const docRef = firestore()
         .collection(CollectionName.ROOMS)
         .doc(roomId)
         .collection(CollectionName.MESSAGES)
         .doc(messageId)
-        .update({ read: true })
+    const message = (await docRef.get()).data()
+    await docRef.update({ read_by: [...(message?.read_by ?? []), currentFirebaseUser.uid] })
 }
 
 /**

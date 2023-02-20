@@ -61,7 +61,7 @@ export namespace MessageType {
         text: string | null
         metadata: Record<string, any> | null
         delivered: boolean
-        read: boolean
+        read_by: string[]
         created_at: FirebaseFirestoreTypes.Timestamp
         updated_at: FirebaseFirestoreTypes.Timestamp
     }
