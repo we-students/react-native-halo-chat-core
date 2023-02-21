@@ -449,7 +449,7 @@ export const fetchMessages = (
 
 export const fetchMedia = async (
     roomId: string,
-    contentType: MessageType.ContentType,
+    contentType: MessageType.ContentType[],
 ): Promise<{ uri: string; mimeType: string | null; name: string }[]> => {
     const messagesSnapshots = await firestore()
         .collection(CollectionName.ROOMS)
@@ -463,6 +463,6 @@ export const fetchMedia = async (
                 (m2.data() as MessageType.Any).created_at.toMillis() -
                 (m1.data() as MessageType.Any).created_at.toMillis(),
         )
-        .filter((m) => (m.data() as MessageType.Any).content_type === contentType)
+        .filter((m) => contentType.includes((m.data() as MessageType.Any).content_type))
         .map((m) => (m.data() as MessageType.File).file)
 }
