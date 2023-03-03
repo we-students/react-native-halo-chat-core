@@ -111,11 +111,19 @@ export const joinUser = async (roomId: string): Promise<Room> => {
 
     const oldRoom = (await (await firestore().collection(CollectionName.ROOMS).doc(roomId).get()).data()) as Room
 
+    if (oldRoom.users_ids.includes(user.id)) {
+        throw new Error('joinUser: user already in chat')
+    }
+
     const usersIds = [...oldRoom.users_ids, user.id]
 
-    await firestore().collection(CollectionName.ROOMS).doc(roomId).update({
-        users_ids: usersIds,
-    })
+    await firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .update({
+            users_ids: usersIds,
+            removed_users_ids: oldRoom.removed_users_ids.filter((uid) => uid !== user.id),
+        })
 
     const res = (await (await firestore().collection(CollectionName.ROOMS).doc(roomId).get()).data()) as Room
 
@@ -127,6 +135,30 @@ export const joinUser = async (roomId: string): Promise<Room> => {
     }
 
     return { ...res, users }
+}
+
+export const leaveRoomUser = async (roomId: string): Promise<void> => {
+    const currentFirebaseUser = auth().currentUser
+    if (currentFirebaseUser === null) throw new Error('leaveRoomUser: Firebase user not authenticated')
+    const user = await getUser(currentFirebaseUser.uid)
+    if (user === null) throw new Error('leaveRoomUser: user not exists')
+
+    const room = await firestore().collection(CollectionName.ROOMS).doc(roomId).get()
+    if (!room.exists) {
+        throw new Error('leaveRoomUser: room not exists')
+    }
+    const roomData = room.data() as Room
+    if (!roomData.users_ids.includes(user.id) || roomData.removed_users_ids.includes(user.id)) {
+        throw new Error('leaveRoomUser: user not found in room')
+    }
+
+    await firestore()
+        .collection(CollectionName.ROOMS)
+        .doc(roomId)
+        .update({
+            users_ids: roomData.users_ids.filter((uid) => uid !== user.id),
+            removed_users_ids: [...roomData.removed_users_ids, user.id],
+        })
 }
 
 /**
